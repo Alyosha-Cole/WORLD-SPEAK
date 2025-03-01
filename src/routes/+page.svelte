@@ -1,11 +1,16 @@
 <script>
     import CountryMap from '$lib/components/CountryMap.svelte';
-    import { allCountries } from '$lib/countries/index.js';
+    import { 
+      allCountries, 
+      getMajorLanguages, 
+      filterCountriesByLanguage 
+    } from '$lib/countries/index.js';
     import { onMount } from 'svelte';
+    import LanguageNavigation from '$lib/components/LanguageNavigation.svelte';
     
     // Handle country selection
     function handleCountrySelect(event) {
-      selectedCountry = event.detail.country;
+      selectedCountry = event.detail;
       showCountryInfo = true;
     }
   
@@ -14,6 +19,27 @@
     let studyMinutes = 0;
     let selectedCountry = null;
     let showCountryInfo = false;
+  
+    // Get only major languages we want to display
+    const availableLanguages = getMajorLanguages();
+    let currentLanguage = "Spanish"; // Default to Spanish
+    
+    // Language display names for UI
+    const languageDisplayNames = {
+      "Spanish": "Spanish",
+      // Add other language display names as needed
+    };
+    
+    // Filtered map data based on selected language
+    $: filteredMapData = filterCountriesByLanguage(currentLanguage);
+    
+    // Handle language change
+    function handleLanguageChange(event) {
+      currentLanguage = event.detail.language;
+      // Reset selected country when language changes
+      selectedCountry = null;
+      showCountryInfo = false;
+    }
   
     // Language options (sample data)
     const languages = [
@@ -88,11 +114,23 @@
               </button>
             </div>
           </div>
-          <p class="mb-6 text-center text-slate-600">Click on a country to explore its languages and cultures</p>
+          
+          <!-- Language Navigation Component -->
+          <LanguageNavigation 
+            currentLanguage={currentLanguage}
+            availableLanguages={availableLanguages}
+            languageDisplayNames={languageDisplayNames}
+            on:change={handleLanguageChange}
+          />
+          
+          <p class="my-4 text-center text-slate-600">
+            Showing countries where <span class="font-semibold text-[#007685]">{languageDisplayNames[currentLanguage] || currentLanguage}</span> is spoken. 
+            Click on a country to explore its culture.
+          </p>
           
           <div class="relative">
             <CountryMap 
-              mapData={allCountries} 
+              mapData={filteredMapData} 
               width={800} 
               height={600}
               on:select={handleCountrySelect}
@@ -102,17 +140,17 @@
             {#if showCountryInfo && selectedCountry}
               <div class="absolute top-4 right-4 bg-white p-4 rounded-lg shadow-lg max-w-xs border-l-4 border-[#FF8A65]">
                 <div class="flex justify-between items-center mb-2">
-                  <h3 class="font-bold text-[#007685]">{selectedCountry.name}</h3>
+                  <h3 class="font-bold text-[#007685]">{selectedCountry.properties.name}</h3>
                   <button on:click={closeCountryInfo} class="text-slate-400 hover:text-slate-600">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
                     </svg>
                   </button>
                 </div>
-                <p class="text-sm text-slate-600 mb-3">Explore the languages and culture of {selectedCountry.name}.</p>
-                <button class="w-full bg-[#FF8A65] hover:bg-[#FF7043] text-white text-sm font-medium py-2 px-4 rounded transition duration-200">
-                  Learn More
-                </button>
+                <p class="text-sm text-slate-600 mb-3">Explore {languageDisplayNames[currentLanguage] || currentLanguage} language and culture in {selectedCountry.properties.name}.</p>
+                <a href={`/country/${selectedCountry.properties.code}/people`} class="block w-full bg-[#FF8A65] hover:bg-[#FF7043] text-white text-sm font-medium py-2 px-4 rounded transition duration-200 text-center">
+                  Meet the People
+                </a>
               </div>
             {/if}
           </div>
