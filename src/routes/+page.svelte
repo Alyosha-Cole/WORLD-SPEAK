@@ -27,6 +27,7 @@
     // Language display names for UI
     const languageDisplayNames = {
       "Spanish": "Spanish",
+      "Russian": "Russian",
       // Add other language display names as needed
     };
     

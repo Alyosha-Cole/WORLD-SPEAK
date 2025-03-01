@@ -79,6 +79,48 @@ export const peopleByCountry = {
         "From the Altiplano region, Luisa cultivates quinoa using sustainable farming practices passed down through generations, contributing to Bolivia's growing organic export market.",
     },
   ],
+
+  // Add this to the peopleByCountry object in src/lib/data/peopleData.js
+
+  // Russia
+  ru: [
+    {
+      name: "Mikhail Petrov",
+      occupation: "Literary Scholar",
+      description:
+        "A respected professor from Saint Petersburg who specializes in Dostoevsky and Tolstoy, sharing Russia's rich literary heritage with students from around the world.",
+    },
+    {
+      name: "Elena Volkova",
+      occupation: "Ballet Instructor",
+      description:
+        "Former prima ballerina at the Bolshoi Theater who now teaches classical Russian ballet techniques to a new generation of dancers in Moscow.",
+    },
+    {
+      name: "Ivan Sokolov",
+      occupation: "Siberian Forest Ranger",
+      description:
+        "From the Taiga forests near Lake Baikal, Ivan monitors wildlife and promotes sustainable practices in one of the world's largest forest ecosystems.",
+    },
+    {
+      name: "Natalya Orlova",
+      occupation: "Traditional Folk Artist",
+      description:
+        "Creates stunning matryoshka dolls and painted lacquer boxes in Sergiev Posad, preserving centuries-old Russian artistic traditions with contemporary themes.",
+    },
+    {
+      name: "Dmitri Kuznetsov",
+      occupation: "Tech Entrepreneur",
+      description:
+        "A forward-thinking founder of a successful tech startup in Moscow's growing digital ecosystem, combining Russian mathematical excellence with global innovation.",
+    },
+    {
+      name: "Anastasia Morozova",
+      occupation: "Arctic Researcher",
+      description:
+        "Based in Murmansk, she studies climate change impacts on the Arctic Circle, documenting changes to this vital and vulnerable northern ecosystem.",
+    },
+  ],
 };
 
 // Helper function to get people for a specific country

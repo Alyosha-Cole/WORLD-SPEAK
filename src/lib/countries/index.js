@@ -1,8 +1,9 @@
 import { argentina } from "./argentina.js";
 import { bolivia } from "./bolivia.js";
+import { russia } from "./russia.js";
 
 // Export individual countries for direct access
-export { argentina, bolivia };
+export { argentina, bolivia, russia };
 
 // Export a combined GeoJSON with all countries
 export const allCountries = {
@@ -10,6 +11,7 @@ export const allCountries = {
   features: [
     argentina,
     bolivia,
+    russia,
     // Add more countries as you create them
   ],
 };
@@ -53,6 +55,7 @@ export function getCountryLanguages() {
 // Define major languages we want to display
 export const majorLanguages = [
   "Spanish",
+  "Russian",
   // Add other major languages as needed
 ];
 
