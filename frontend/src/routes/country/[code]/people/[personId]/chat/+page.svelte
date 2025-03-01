@@ -25,6 +25,31 @@
       description: 'No details available'
     };
     
+    // Determine language based on country code
+    function getLanguageForCountry(code) {
+      const languageMap = {
+        'ar': 'spanish',
+        'bo': 'spanish',
+        'cl': 'spanish',
+        'co': 'spanish',
+        'es': 'spanish',
+        'mx': 'spanish',
+        'ru': 'russian',
+        // Add more mappings as needed
+      };
+      return languageMap[code.toLowerCase()] || 'spanish';
+    }
+    
+    // Get the language for this conversation
+    const conversationLanguage = getLanguageForCountry(countryCode);
+    
+    // Enhance the person object with location info from country
+    const enhancedPerson = {
+      ...person,
+      location: country?.properties.name || 'unknown country',
+      language: conversationLanguage
+    };
+    
     // Chat state
     let messages = [];
     let userInput = '';
@@ -39,11 +64,19 @@
         messages = JSON.parse(savedMessages);
       }
       
-      // Add welcome message if it's a new chat
       if (messages.length === 0) {
+        // Default welcome message in Spanish
+        let welcomeMessage = `¡Hola! Soy ${person.name}. ¿En qué puedo ayudarte hoy?`;
+        
+        // Choose welcome message based on language
+        if (conversationLanguage === 'russian') {
+          welcomeMessage = `Привет! Меня зовут ${person.name}. Чем я могу вам помочь сегодня?`;
+        }
+        // Add more language options as needed
+        
         messages = [{
           role: 'assistant',
-          content: `¡Hola! Soy ${person.name}. ¿En qué puedo ayudarte hoy?`
+          content: welcomeMessage
         }];
       }
     });
@@ -67,11 +100,15 @@
       isLoading = true;
       
       try {
-        // Call the backend API
+        // Call the backend API with person info and language
         const response = await fetch('http://localhost:5000/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages })
+          body: JSON.stringify({ 
+            messages,
+            person: enhancedPerson,
+            language: conversationLanguage
+          })
         });
         
         const data = await response.json();
@@ -114,7 +151,7 @@
     <header class="bg-white shadow p-4">
       <div class="container mx-auto px-4">
         <div class="flex items-center">
-          <a href="/country{countryCode}/people" class="text-primary hover:underline flex items-center">
+          <a href="/country/{countryCode}/people" class="text-primary hover:underline flex items-center">
             <ArrowLeft class="h-5 w-5 mr-1" />
             Back to People
           </a>

@@ -15,14 +15,57 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Language template mapping
+const languageTemplates = {
+  spanish: {
+    systemPrompt: (person) => `You are ${person.name}, a ${
+      person.occupation
+    } from ${person.location || "your country"}. 
+    ${person.description}
+    
+    Always respond in Spanish in a way that reflects your background, personality, and profession.
+    Keep responses relatively short (2-4 sentences) to encourage back-and-forth conversation.
+    If asked about topics you're knowledgeable about based on your occupation and background, provide helpful insights.
+    If asked about personal details not specified, create consistent, plausible details that match your character.`,
+    language: "Spanish",
+  },
+  russian: {
+    systemPrompt: (person) => `You are ${person.name}, a ${
+      person.occupation
+    } from ${person.location || "your country"}. 
+    ${person.description}
+    
+    Always respond in Russian in a way that reflects your background, personality, and profession.
+    Keep responses relatively short (2-4 sentences) to encourage back-and-forth conversation.
+    If asked about topics you're knowledgeable about based on your occupation and background, provide helpful insights.
+    If asked about personal details not specified, create consistent, plausible details that match your character.`,
+    language: "Russian",
+  },
+  // Add more languages as needed
+  default: {
+    systemPrompt: (person) => `You are ${person.name}, a ${
+      person.occupation
+    } from ${person.location || "your country"}. 
+    ${person.description}
+    
+    Always respond in Spanish in a way that reflects your background, personality, and profession.
+    Keep responses relatively short (2-4 sentences) to encourage back-and-forth conversation.
+    If asked about topics you're knowledgeable about based on your occupation and background, provide helpful insights.
+    If asked about personal details not specified, create consistent, plausible details that match your character.`,
+    language: "Spanish",
+  },
+};
+
 /**
  * 1) Chat endpoint: /api/chat
  */
 app.post("/api/chat", async (req, res) => {
   try {
     console.log("Received /api/chat request");
-    const { messages } = req.body;
+    const { messages, person, language = "spanish" } = req.body;
     console.log("Messages received:", messages);
+    console.log("Person info:", person);
+    console.log("Language:", language);
 
     if (!Array.isArray(messages)) {
       console.error("Invalid request: 'messages' is not an array.");
@@ -30,6 +73,10 @@ app.post("/api/chat", async (req, res) => {
         .status(400)
         .json({ error: "Invalid request. 'messages' should be an array." });
     }
+
+    // Get the appropriate language template
+    const template =
+      languageTemplates[language.toLowerCase()] || languageTemplates.default;
 
     // Convert user-supplied messages to the format needed by OpenAI
     const sanitizedMessages = messages.map((msg) => ({
@@ -41,15 +88,14 @@ app.post("/api/chat", async (req, res) => {
     }));
     console.log("Sanitized messages:", sanitizedMessages);
 
-    // Prepend a system message to force Spanish responses
-    const conversation = [
-      {
-        role: "system",
-        content:
-          "Eres un tutor de español servicial. Responde siempre en español, sin importar lo que el usuario escriba.",
-      },
-      ...sanitizedMessages,
-    ];
+    // Create a custom system message based on the person
+    const systemMessage = {
+      role: "system",
+      content: template.systemPrompt(person),
+    };
+
+    // Build the conversation with our custom system message
+    const conversation = [systemMessage, ...sanitizedMessages];
     console.log("Full conversation sent to OpenAI:", conversation);
 
     // Call OpenAI's Chat Completion API
@@ -76,26 +122,31 @@ app.post("/api/chat", async (req, res) => {
 app.post("/api/generateExample", async (req, res) => {
   try {
     console.log("Received /api/generateExample request");
-    const { word } = req.body;
+    const { word, language = "spanish" } = req.body;
     console.log("Word received:", word);
+    console.log("Language:", language);
 
     if (!word) {
       console.error("No 'word' provided in request body.");
       return res.status(400).json({ error: "No 'word' provided." });
     }
 
+    // Get the appropriate language
+    const template =
+      languageTemplates[language.toLowerCase()] || languageTemplates.default;
+    const targetLanguage = template.language;
+
     // Create a specialized prompt for generating a short example sentence
-    const prompt = `Proporciona una oración corta en español usando la palabra "${word}".`;
+    const prompt = `Provide a short, simple sentence in ${targetLanguage} using the word "${word}".`;
     console.log("Prompt for example generation:", prompt);
 
-    // Call the OpenAI Chat Completion API for a short Spanish sentence
+    // Call the OpenAI Chat Completion API for a short sentence
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
         {
           role: "system",
-          content:
-            "You are a helpful Spanish tutor. Always respond in Spanish, and provide short example sentences.",
+          content: `You are a helpful ${targetLanguage} tutor. Always respond in ${targetLanguage}, and provide short example sentences.`,
         },
         { role: "user", content: prompt },
       ],
