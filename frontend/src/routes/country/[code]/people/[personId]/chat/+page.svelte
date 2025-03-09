@@ -1,3 +1,4 @@
+world-speak/frontend/src/routes/country\[code]/people/[personId]\chat
 <script>
     import { page } from '$app/stores';
     import { allCountries } from '$lib/countries/index.js';
