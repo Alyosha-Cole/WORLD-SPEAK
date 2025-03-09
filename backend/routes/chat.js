@@ -1,12 +1,13 @@
 import express from "express";
 import { OpenAI } from "openai";
 import { languageTemplates } from "../config/languageTemplates.js";
+import config from "../config/config.js";
 
 const router = express.Router();
 
-// Initialize the OpenAI client
+// Initialize the OpenAI client with the API key from config
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: config.openaiApiKey,
 });
 
 router.post("/", async (req, res) => {

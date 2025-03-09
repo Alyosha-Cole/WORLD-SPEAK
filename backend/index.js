@@ -1,8 +1,6 @@
-import dotenv from "dotenv";
-dotenv.config();
-
 import express from "express";
 import cors from "cors";
+import config from "./config/config.js"; // Import config which loads env variables
 
 const app = express();
 app.use(cors());
@@ -16,7 +14,7 @@ import generateExampleRoutes from "./routes/generateExample.js";
 app.use("/api/chat", chatRoutes);
 app.use("/api/generateExample", generateExampleRoutes);
 
-const PORT = process.env.PORT || 5000;
+const PORT = config.port;
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
