@@ -6,6 +6,8 @@
   import { onMount, afterUpdate } from 'svelte';
   import TokenDisplay from '$lib/components/TokenDisplay.svelte';
   import LanguageLearningToolbar from '$lib/components/LanguageLearningToolbar.svelte';
+  import DefaultView from '$lib/components/DefaultView.svelte'; // Import DefaultView component
+  import WordDetailSidebar from '$lib/components/WordDetailSidebar.svelte'; // Import WordDetailSidebar
   
   // Get country code and person ID from URL
   const countryCode = $page.params.code;
@@ -76,13 +78,23 @@
   let showGrammar = false;
   let learningMode = "default"; // Current learning mode: default, linguist, purist, translator
   
+  // Word sidebar state
+  let showWordSidebar = false;
+  let selectedWord = null;
+  let selectedWordPosInfo = null;
+  
   // Load chat history from localStorage
   onMount(() => {
     const storageKey = `chat_${countryCode}_${personId}`;
     const savedMessages = localStorage.getItem(storageKey);
     if (savedMessages) {
-      messages = JSON.parse(savedMessages);
-      lastReadMessageIndex = messages.length - 1;
+      try {
+        messages = JSON.parse(savedMessages);
+        lastReadMessageIndex = messages.length - 1;
+      } catch (e) {
+        console.error("Error parsing saved messages:", e);
+        messages = [];
+      }
     }
     
     if (messages.length === 0) {
@@ -242,6 +254,10 @@
         })
       });
       
+      if (!response.ok) {
+        throw new Error(`API returned status ${response.status}`);
+      }
+      
       const data = await response.json();
       
       // Add assistant response with a unique ID
@@ -395,6 +411,13 @@
     // You could add different behavior based on the selected mode
     console.log(`Switched to ${mode} mode`);
   }
+  
+  // Handle word click in default mode
+  function handleWordClick(word, posInfo) {
+    selectedWord = word;
+    selectedWordPosInfo = posInfo;
+    showWordSidebar = true;
+  }
 </script>
 
 <svelte:head>
@@ -487,8 +510,12 @@
                   <!-- Purist mode is not fully implemented yet -->
                   {msg.content}
                 {:else}
-                  <!-- Default mode just shows the text -->
-                  {msg.content}
+                  <!-- Default mode with word analysis -->
+                  <DefaultView 
+                    message={msg.content} 
+                    language={conversationLanguage}
+                    on:wordClick={(event) => handleWordClick(event.detail.word, event.detail.posInfo)}
+                  />
                 {/if}
               {:else}
                 <!-- User messages are always shown as-is -->
@@ -559,3 +586,14 @@
     </div>
   </div>
 </div>
+
+<!-- Word Detail Sidebar - Include the component here -->
+<!-- Word Detail Sidebar - Include the component here -->
+{#if showWordSidebar}
+  <WordDetailSidebar 
+    word={selectedWord}
+    posInfo={selectedWordPosInfo}
+    language={conversationLanguage}
+    bind:visible={showWordSidebar}
+  />
+{/if}
