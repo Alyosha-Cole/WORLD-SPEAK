@@ -69,11 +69,12 @@
   let loadingVoiceId = null;
   let audioCache = new Map(); // Store generated audio files to avoid repeated calls
   
-  // Language analysis state
+  // Language analysis and learning mode state
   let analysisIndex = null; // Index of the message being analyzed
   let globalAnalysisMode = false; // Whether analysis mode is globally enabled
   let showDictionary = false;
   let showGrammar = false;
+  let learningMode = "default"; // Current learning mode: default, linguist, purist, translator
   
   // Load chat history from localStorage
   onMount(() => {
@@ -380,6 +381,20 @@
     alert('Grammar reference feature coming soon!');
     showGrammar = false;
   }
+  
+  // Change learning mode
+  function changeLearningMode(mode) {
+    learningMode = mode;
+    
+    // Reset analysis when switching modes
+    if (mode !== "linguist") {
+      analysisIndex = null;
+      globalAnalysisMode = false;
+    }
+    
+    // You could add different behavior based on the selected mode
+    console.log(`Switched to ${mode} mode`);
+  }
 </script>
 
 <svelte:head>
@@ -406,10 +421,12 @@
     <LanguageLearningToolbar 
       language={conversationLanguage} 
       analysisMode={analysisIndex !== null}
+      learningMode={learningMode}
       on:toggleAnalysis={() => {
         analysisIndex = null;
         globalAnalysisMode = !globalAnalysisMode;
       }}
+      on:changeLearningMode={(event) => changeLearningMode(event.detail.mode)}
       on:openDictionary={() => openDictionary()}
       on:openGrammar={() => openGrammar()}
     />
@@ -459,16 +476,29 @@
               {!isContinuation(i) && msg.role === 'assistant' ? 'rounded-bl-md' : ''}
               {isContinuation(i) ? 'my-0.5' : 'mt-0.5'}
             ">
-              {#if analysisIndex === i && msg.role === 'assistant'}
-                <TokenDisplay message={msg.content} language={conversationLanguage} />
+              {#if msg.role === 'assistant'}
+                <!-- Render based on current learning mode -->
+                {#if learningMode === "linguist" && analysisIndex === i}
+                  <TokenDisplay message={msg.content} language={conversationLanguage} />
+                {:else if learningMode === "translator"}
+                  <!-- Translator mode is not fully implemented yet -->
+                  {msg.content}
+                {:else if learningMode === "purist"}
+                  <!-- Purist mode is not fully implemented yet -->
+                  {msg.content}
+                {:else}
+                  <!-- Default mode just shows the text -->
+                  {msg.content}
+                {/if}
               {:else}
+                <!-- User messages are always shown as-is -->
                 {msg.content}
               {/if}
             </div>
           </div>
           
-          <!-- Analysis button for assistant messages only -->
-          {#if msg.role === 'assistant' && (globalAnalysisMode || analysisIndex === i)}
+          <!-- Analysis button for assistant messages only when in linguist mode -->
+          {#if msg.role === 'assistant' && learningMode === "linguist" && (globalAnalysisMode || analysisIndex === i)}
             <div class="text-xs text-blue-500 mt-1 ml-2 cursor-pointer hover:underline"
                  on:click={() => toggleAnalysis(i)}>
               {analysisIndex === i ? 'Hide Analysis' : 'Analyze Words'}
