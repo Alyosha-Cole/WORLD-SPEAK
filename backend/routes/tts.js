@@ -13,20 +13,22 @@ const elevenLabs = new ElevenLabsClient({
 router.post("/", async (req, res) => {
   try {
     console.log("Received /api/tts request");
-    const { text, voiceId = "IRjsPfajDk6jveoGo3jI" } = req.body;
-    console.log("Text received:", text.substring(0, 100) + "..."); // Log first 100 chars
+    const { text, voiceId = "IRjsPfajDk6jveoGo3jI", speed = 0.7 } = req.body;
+    console.log("Text received:", text.substring(0, 100) + "...");
     console.log("Voice ID:", voiceId);
+    console.log("Speed:", speed);
 
     if (!text) {
       console.error("No 'text' provided in request body.");
       return res.status(400).json({ error: "No 'text' provided." });
     }
 
-    // Call ElevenLabs API
+    // Call ElevenLabs API with the speed parameter included
     const audioStream = await elevenLabs.textToSpeech.convert(voiceId, {
       output_format: "mp3_44100_128",
       text: text,
       model_id: "eleven_multilingual_v2",
+      speed: speed, // Adjust speech speed between 0.7 and 1.2
     });
 
     // Set appropriate headers for audio data
@@ -38,14 +40,10 @@ router.post("/", async (req, res) => {
       const nodeReadable = Readable.fromWeb(audioStream);
       nodeReadable.pipe(res);
     } else {
-      // Handle if it's already a buffer or other format
-      // First collect all chunks
       const chunks = [];
       for await (const chunk of audioStream) {
         chunks.push(chunk);
       }
-
-      // Convert collected chunks to a single buffer and send
       const buffer = Buffer.concat(chunks);
       res.send(buffer);
     }
