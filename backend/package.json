@@ -16,7 +16,9 @@
     "dotenv": "^16.4.7",
     "elevenlabs": "^1.53.0",
     "express": "^4.21.2",
-    "openai": "^4.86.1"
+    "openai": "^4.86.1",
+    "python-shell": "^5.0.0",
+    "spacy-js": "^0.0.5"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"

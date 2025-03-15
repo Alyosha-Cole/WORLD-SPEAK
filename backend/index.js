@@ -10,11 +10,13 @@ app.use(express.json());
 import chatRoutes from "./routes/chat.js";
 import generateExampleRoutes from "./routes/generateExample.js";
 import ttsRoutes from "./routes/tts.js";
+import nlpRoutes from "./routes/nlp.js"; // Import our new NLP routes
 
 // Set up route handlers
 app.use("/api/chat", chatRoutes);
 app.use("/api/generateExample", generateExampleRoutes);
 app.use("/api/tts", ttsRoutes);
+app.use("/api/nlp", nlpRoutes); // Add our new NLP routes
 
 const PORT = config.port;
 app.listen(PORT, () => {

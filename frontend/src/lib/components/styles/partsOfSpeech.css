@@ -1,0 +1,149 @@
+/* POS token styling */
+.pos-token {
+  display: inline-block;
+  padding: 2px 4px;
+  margin: 0 1px;
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.3);
+}
+
+.pos-token:hover {
+  opacity: 0.8;
+}
+
+/* Color mapping for parts of speech */
+.pos-NOUN {
+  background-color: rgba(200, 230, 201, 0.7); /* light green */
+}
+
+.pos-VERB {
+  background-color: rgba(255, 205, 210, 0.7); /* light red */
+}
+
+.pos-ADJ {
+  background-color: rgba(187, 222, 251, 0.7); /* light blue */
+}
+
+.pos-ADV {
+  background-color: rgba(209, 196, 233, 0.7); /* light purple */
+}
+
+.pos-PROPN {
+  background-color: rgba(255, 236, 179, 0.7); /* light yellow */
+}
+
+.pos-PRON {
+  background-color: rgba(224, 247, 250, 0.7); /* light cyan */
+}
+
+.pos-DET {
+  background-color: rgba(240, 244, 195, 0.7); /* light lime */
+}
+
+.pos-ADP {
+  background-color: rgba(255, 224, 178, 0.7); /* light orange */
+}
+
+.pos-NUM {
+  background-color: rgba(225, 190, 231, 0.7); /* light pink */
+}
+
+.pos-CONJ,
+.pos-CCONJ,
+.pos-SCONJ {
+  background-color: rgba(207, 216, 220, 0.7); /* light gray */
+}
+
+.pos-PUNCT {
+  /* No background for punctuation */
+  border-bottom: none;
+  cursor: default;
+}
+
+/* Token info tooltip */
+.token-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.pos-token:hover .token-tooltip {
+  opacity: 1;
+}
+
+.token-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
+}
+
+/* Token modal */
+.token-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.token-modal-content {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.token-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.token-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+}
+
+.token-detail-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 8px;
+}
+
+.token-detail-label {
+  font-weight: bold;
+  color: #333;
+}
+
+.token-detail-value {
+  color: #007685;
+}
