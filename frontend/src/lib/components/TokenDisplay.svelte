@@ -1,6 +1,6 @@
 <script>
     import { onMount } from 'svelte';
-    import '../styles/partsOfSpeech.css';
+    import '../components/styles/partsOfSpeech.css'
     
     // Props
     export let message = "";

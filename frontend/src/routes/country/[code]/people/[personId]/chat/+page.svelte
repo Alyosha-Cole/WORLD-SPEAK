@@ -4,6 +4,8 @@
   import { getPeopleForCountry, getDefaultPeople } from '$lib/data/peopleData.js';
   import { ArrowLeft, Send, ChevronsDown, Volume2, Loader } from 'lucide-svelte';
   import { onMount, afterUpdate } from 'svelte';
+  import TokenDisplay from '$lib/components/TokenDisplay.svelte';
+  import LanguageLearningToolbar from '$lib/components/LanguageLearningToolbar.svelte';
   
   // Get country code and person ID from URL
   const countryCode = $page.params.code;
@@ -66,6 +68,12 @@
   let playingMessageId = null;
   let loadingVoiceId = null;
   let audioCache = new Map(); // Store generated audio files to avoid repeated calls
+  
+  // Language analysis state
+  let analysisIndex = null; // Index of the message being analyzed
+  let globalAnalysisMode = false; // Whether analysis mode is globally enabled
+  let showDictionary = false;
+  let showGrammar = false;
   
   // Load chat history from localStorage
   onMount(() => {
@@ -335,6 +343,43 @@
   function getMessageTime() {
     return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
+  
+  // Toggle analysis mode for a specific message
+  function toggleAnalysis(index) {
+    if (analysisIndex === index) {
+      analysisIndex = null;
+    } else {
+      analysisIndex = index;
+      
+      // If we're entering analysis mode for a message,
+      // make sure global analysis mode is enabled
+      if (index !== null) {
+        globalAnalysisMode = true;
+      }
+    }
+    
+    // Reset scroll position detection
+    userHasScrolled = false;
+    
+    // Force re-render by creating a new messages array
+    messages = [...messages];
+  }
+  
+  // Open dictionary (placeholder for future feature)
+  function openDictionary() {
+    showDictionary = true;
+    // Here you would implement dictionary functionality
+    alert('Dictionary feature coming soon!');
+    showDictionary = false;
+  }
+  
+  // Open grammar reference (placeholder for future feature)
+  function openGrammar() {
+    showGrammar = true;
+    // Here you would implement grammar reference functionality
+    alert('Grammar reference feature coming soon!');
+    showGrammar = false;
+  }
 </script>
 
 <svelte:head>
@@ -343,8 +388,8 @@
 
 <div class="relative h-full flex flex-col">
   <!-- Header with person info -->
-  <header class="sticky top-0 z-20 bg-white shadow-sm p-3">
-    <div class="flex items-center">
+  <header class="sticky top-0 z-20 bg-white shadow-sm">
+    <div class="flex items-center p-3">
       <a href="/country/{countryCode}/people" class="text-[#007685] hover:text-[#65C3BA] flex items-center">
         <ArrowLeft class="h-5 w-5 mr-1" />
         <span class="hidden md:inline">Back</span>
@@ -356,6 +401,18 @@
         <p class="text-xs text-gray-500">{person.occupation} • {enhancedPerson.location}</p>
       </div>
     </div>
+    
+    <!-- Language learning toolbar -->
+    <LanguageLearningToolbar 
+      language={conversationLanguage} 
+      analysisMode={analysisIndex !== null}
+      on:toggleAnalysis={() => {
+        analysisIndex = null;
+        globalAnalysisMode = !globalAnalysisMode;
+      }}
+      on:openDictionary={() => openDictionary()}
+      on:openGrammar={() => openGrammar()}
+    />
   </header>
 
   <!-- Messages container - Takes full height with scrolling -->
@@ -402,9 +459,21 @@
               {!isContinuation(i) && msg.role === 'assistant' ? 'rounded-bl-md' : ''}
               {isContinuation(i) ? 'my-0.5' : 'mt-0.5'}
             ">
-              {msg.content}
+              {#if analysisIndex === i && msg.role === 'assistant'}
+                <TokenDisplay message={msg.content} language={conversationLanguage} />
+              {:else}
+                {msg.content}
+              {/if}
             </div>
           </div>
+          
+          <!-- Analysis button for assistant messages only -->
+          {#if msg.role === 'assistant' && (globalAnalysisMode || analysisIndex === i)}
+            <div class="text-xs text-blue-500 mt-1 ml-2 cursor-pointer hover:underline"
+                 on:click={() => toggleAnalysis(i)}>
+              {analysisIndex === i ? 'Hide Analysis' : 'Analyze Words'}
+            </div>
+          {/if}
         </div>
       {/each}
       
