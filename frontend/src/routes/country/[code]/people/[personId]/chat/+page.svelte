@@ -8,10 +8,21 @@
   import LanguageLearningToolbar from '$lib/components/LanguageLearningToolbar.svelte';
   import DefaultView from '$lib/components/DefaultView.svelte'; // Import DefaultView component
   import WordDetailSidebar from '$lib/components/WordDetailSidebar.svelte'; // Import WordDetailSidebar
-  
+  import ChatModesToolbar from '$lib/components/ChatModesToolbar.svelte';
+
   // Get country code and person ID from URL
   const countryCode = $page.params.code;
   const personId = $page.params.personId;
+
+   // Add this to your existing variables
+   let isChatModesExpanded = false;
+  
+  // Add this function to handle mode selection
+  function handleModeSelect(event) {
+    const mode = event.detail.mode;
+    console.log(`Selected mode: ${mode}`);
+    alert(`${mode} mode is coming soon!`);
+  }
   
   // Find country data
   const country = allCountries.features.find(
@@ -548,6 +559,11 @@
       {/if}
     </div>
   </div>
+
+  <ChatModesToolbar 
+  bind:expanded={isChatModesExpanded}
+  on:select={handleModeSelect}
+/>
 
   <!-- Scroll to bottom button - Show when not at bottom -->
   <button 
