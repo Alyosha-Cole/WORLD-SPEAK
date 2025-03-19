@@ -10,6 +10,55 @@
   import WordDetailSidebar from '$lib/components/WordDetailSidebar.svelte'; // Import WordDetailSidebar
   import ChatModesToolbar from '$lib/components/ChatModesToolbar.svelte';
 
+
+
+  // Add a state variable to track which features are enabled
+let enabledFeatures = {
+  inspect: true,   // Already implemented
+  speak: false,    // Coming soon
+  translate: false, // Coming soon
+  image: false      // Coming soon
+};
+
+// Update the handleWordClick function to handle different tool actions
+function handleWordClick(event) {
+  const { word, posInfo } = event.detail;
+  selectedWord = word;
+  selectedWordPosInfo = posInfo;
+  showWordSidebar = true;
+}
+
+// Add handlers for other tool actions
+function handleSpeak(event) {
+  const { word } = event.detail;
+  // Implement speak functionality or show coming soon
+  if (!enabledFeatures.speak) {
+    alert("Speak feature coming soon!");
+    return;
+  }
+  // Actual implementation goes here
+}
+
+function handleTranslate(event) {
+  const { word, posInfo } = event.detail;
+  // Implement translate functionality or show coming soon
+  if (!enabledFeatures.translate) {
+    alert("Translation feature coming soon!");
+    return;
+  }
+  // Actual implementation goes here
+}
+
+function handleImage(event) {
+  const { word } = event.detail;
+  // Implement image functionality or show coming soon
+  if (!enabledFeatures.image) {
+    alert("Image feature coming soon!");
+    return;
+  }
+  // Actual implementation goes here
+}
+
   // Get country code and person ID from URL
   const countryCode = $page.params.code;
   const personId = $page.params.personId;
@@ -423,12 +472,7 @@
     console.log(`Switched to ${mode} mode`);
   }
   
-  // Handle word click in default mode
-  function handleWordClick(word, posInfo) {
-    selectedWord = word;
-    selectedWordPosInfo = posInfo;
-    showWordSidebar = true;
-  }
+
 </script>
 
 <svelte:head>
@@ -521,12 +565,15 @@
                   <!-- Purist mode is not fully implemented yet -->
                   {msg.content}
                 {:else}
-                  <!-- Default mode with word analysis -->
-                  <DefaultView 
-                    message={msg.content} 
-                    language={conversationLanguage}
-                    on:wordClick={(event) => handleWordClick(event.detail.word, event.detail.posInfo)}
-                  />
+                  <!-- In the chat messages section, modify the DefaultView component usage -->
+<DefaultView 
+message={msg.content} 
+language={conversationLanguage}
+on:wordClick={handleWordClick}
+on:speak={handleSpeak}
+on:translate={handleTranslate}
+on:image={handleImage}
+/>
                 {/if}
               {:else}
                 <!-- User messages are always shown as-is -->
