@@ -22,9 +22,10 @@ let enabledFeatures = {
 
 // Update the handleWordClick function to handle different tool actions
 function handleWordClick(event) {
-  const { word, posInfo } = event.detail;
+  const { word, posInfo, context } = event.detail;
   selectedWord = word;
   selectedWordPosInfo = posInfo;
+  selectedWordContext = context; // Store the context
   showWordSidebar = true;
 }
 
@@ -142,6 +143,8 @@ function handleImage(event) {
   let showWordSidebar = false;
   let selectedWord = null;
   let selectedWordPosInfo = null;
+  let selectedWordContext = null; // Add this missing variable
+
   
   // Load chat history from localStorage
   onMount(() => {
@@ -651,11 +654,11 @@ on:image={handleImage}
 </div>
 
 <!-- Word Detail Sidebar - Include the component here -->
-<!-- Word Detail Sidebar - Include the component here -->
 {#if showWordSidebar}
   <WordDetailSidebar 
     word={selectedWord}
     posInfo={selectedWordPosInfo}
+    context={selectedWordContext}
     language={conversationLanguage}
     bind:visible={showWordSidebar}
   />

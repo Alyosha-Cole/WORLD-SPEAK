@@ -8,6 +8,7 @@
   export let posInfo = null; // Part of speech info
   export let language = "spanish"; // Current language
   export let visible = false; // Visibility control
+  export let context = null; // NEW: The sentence context where the word appears
   
   // State
   let showNativeExplanation = false; // Toggle for explanation language
@@ -158,7 +159,8 @@
         body: JSON.stringify({ 
           word: wordText,
           language: lang,
-          pos: posInfo?.pos || null
+          pos: posInfo?.pos || null,
+          context: context // Pass the sentence context to the API
         })
       });
       
@@ -288,6 +290,16 @@
       
       <!-- Content -->
       <div class="flex-grow overflow-y-auto p-4 space-y-6">
+        <!-- Context section - Show the original sentence if available -->
+        {#if context}
+          <div class="context-section">
+            <h3 class="text-sm font-medium text-gray-500 uppercase mb-2">Context</h3>
+            <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <p class="text-sm text-gray-800">{context}</p>
+            </div>
+          </div>
+        {/if}
+        
         <!-- Image section -->
         {#if imageUrl}
           <div class="image-section">

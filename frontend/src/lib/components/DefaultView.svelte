@@ -45,6 +45,73 @@
     alert(`Speak functionality for word "${word}" coming soon!`);
   }
   
+  // Function to extract the sentence containing a word
+  function extractSentenceContext(fullMessage, word) {
+    // Common sentence terminators
+    const sentenceTerminators = ['.', '!', '?', '¡', '¿', '\n'];
+    // For Russian language support
+    if (language === 'russian') {
+      sentenceTerminators.push(';', ':');
+    }
+    
+    // If we don't have a word or message, return null
+    if (!word || !fullMessage) return null;
+    
+    // Find the word position - case insensitive search
+    const wordPosition = fullMessage.toLowerCase().indexOf(word.toLowerCase());
+    if (wordPosition === -1) return null;
+    
+    // Find the start of the sentence
+    let sentenceStart = 0;
+    for (let i = wordPosition; i > 0; i--) {
+      if (sentenceTerminators.includes(fullMessage[i])) {
+        sentenceStart = i + 1;
+        break;
+      }
+    }
+    
+    // Find the end of the sentence
+    let sentenceEnd = fullMessage.length;
+    for (let i = wordPosition; i < fullMessage.length; i++) {
+      if (sentenceTerminators.includes(fullMessage[i])) {
+        sentenceEnd = i + 1;
+        break;
+      }
+    }
+    
+    // Extract and clean the sentence
+    let sentenceContext = fullMessage.substring(sentenceStart, sentenceEnd).trim();
+    
+    // If the sentence is too long, provide a reasonable context window
+    const MAX_CONTEXT_LENGTH = 150;
+    if (sentenceContext.length > MAX_CONTEXT_LENGTH) {
+      // Find the word position in the sentence
+      const wordInSentencePos = sentenceContext.toLowerCase().indexOf(word.toLowerCase());
+      
+      // Calculate start and end positions for the context window
+      let contextStart = Math.max(0, wordInSentencePos - Math.floor(MAX_CONTEXT_LENGTH / 2));
+      let contextEnd = Math.min(sentenceContext.length, contextStart + MAX_CONTEXT_LENGTH);
+      
+      // Adjust to avoid cutting words
+      while (contextStart > 0 && sentenceContext[contextStart] !== ' ') {
+        contextStart--;
+      }
+      
+      while (contextEnd < sentenceContext.length && sentenceContext[contextEnd] !== ' ') {
+        contextEnd++;
+      }
+      
+      // Extract the context window
+      sentenceContext = sentenceContext.substring(contextStart, contextEnd);
+      
+      // Add ellipsis if we've truncated
+      if (contextStart > 0) sentenceContext = '...' + sentenceContext;
+      if (contextEnd < sentenceContext.length) sentenceContext = sentenceContext + '...';
+    }
+    
+    return sentenceContext;
+  }
+  
   // Forward events from the tool handler to the parent
   function forwardEvent(event) {
     const eventName = event.type;
@@ -54,7 +121,18 @@
     
     // Special case for inspect as it's equivalent to wordClick in the parent
     if (eventName === 'inspect') {
-      dispatch('wordClick', detail);
+      // Get the word from the event detail
+      const { word, posInfo } = detail;
+      
+      // Extract the sentence context
+      const context = extractSentenceContext(message, word);
+      
+      // Dispatch wordClick with enhanced context
+      dispatch('wordClick', { 
+        word, 
+        posInfo, 
+        context 
+      });
     }
   }
 </script>
