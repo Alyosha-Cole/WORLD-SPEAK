@@ -15,7 +15,8 @@
     inspect: true,   // Already implemented
     speak: false,    // Coming soon
     translate: false, // Coming soon
-    image: false      // Coming soon
+    image: false,      // Coming soon
+    analyze: true     // Now enabled directly in the default view
   };
 
   // Update the handleWordClick function to handle different tool actions
@@ -502,13 +503,6 @@
   // Change learning mode
   function changeLearningMode(mode) {
     learningMode = mode;
-    
-    // Reset analysis when switching modes
-    if (mode !== "linguist") {
-      analysisIndex = null;
-      globalAnalysisMode = false;
-    }
-    
     // You could add different behavior based on the selected mode
     console.log(`Switched to ${mode} mode`);
   }
@@ -629,14 +623,7 @@
               {/if}
             </div>
           </div>
-          
-          <!-- Analysis button for assistant messages only when in linguist mode -->
-          {#if msg.role === 'assistant' && learningMode === "linguist" && (globalAnalysisMode || analysisIndex === i)}
-            <div class="text-xs text-blue-500 mt-1 ml-2 cursor-pointer hover:underline"
-                 on:click={() => toggleAnalysis(i)}>
-              {analysisIndex === i ? 'Hide Analysis' : 'Analyze Words'}
-            </div>
-          {/if}
+        
         </div>
       {/each}
       

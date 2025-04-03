@@ -3,6 +3,7 @@
   import { createEventDispatcher } from 'svelte';
   import DefaultModeToolbar from './DefaultModeToolbar.svelte';
   import DefaultToolHandler from './DefaultToolHandler.svelte';
+  import TokenDisplay from './TokenDisplay.svelte';
   
   // Props
   export let message = "";
@@ -17,7 +18,8 @@
     inspect: true,    // Already implemented
     speak: true,      // UI enabled but functionality pending
     translate: false, // Enable when ready
-    image: false      // Enable when ready
+    image: false,     // Enable when ready
+    analyze: true     // Adding linguistics analysis tool
   };
   
   // Event dispatcher to bubble events up to parent
@@ -163,15 +165,21 @@
   {/if}
   
   <!-- Message content with active tool -->
-  <DefaultToolHandler 
-    {message}
-    {language}
-    {activeTool}
-    on:inspect={forwardEvent}
-    on:speak={handleSpeakEvent}
-    on:translate={forwardEvent}
-    on:image={forwardEvent}
-  />
+  {#if activeTool === "analyze"}
+    <div class="analyzed-content p-2 bg-blue-50 rounded">
+      <TokenDisplay message={message} language={language} />
+    </div>
+  {:else}
+    <DefaultToolHandler 
+      {message}
+      {language}
+      {activeTool}
+      on:inspect={forwardEvent}
+      on:speak={handleSpeakEvent}
+      on:translate={forwardEvent}
+      on:image={forwardEvent}
+    />
+  {/if}
 </div>
 
 <style>
@@ -185,5 +193,9 @@
   
   .toolbar-toggle {
     cursor: pointer;
+  }
+  
+  .analyzed-content {
+    line-height: 1.6;
   }
 </style>
