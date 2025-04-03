@@ -2,70 +2,68 @@
   import { page } from '$app/stores';
   import { allCountries } from '$lib/countries/index.js';
   import { getPeopleForCountry, getDefaultPeople } from '$lib/data/peopleData.js';
-  import { ArrowLeft, Send, ChevronsDown, Volume2, Loader } from 'lucide-svelte';
+  import { ArrowLeft, Send, ChevronsDown, Volume2, Loader, Trash2 } from 'lucide-svelte';
   import { onMount, afterUpdate } from 'svelte';
   import TokenDisplay from '$lib/components/TokenDisplay.svelte';
   import LanguageLearningToolbar from '$lib/components/LanguageLearningToolbar.svelte';
-  import DefaultView from '$lib/components/DefaultView.svelte'; // Import DefaultView component
-  import WordDetailSidebar from '$lib/components/WordDetailSidebar.svelte'; // Import WordDetailSidebar
+  import DefaultView from '$lib/components/DefaultView.svelte';
+  import WordDetailSidebar from '$lib/components/WordDetailSidebar.svelte';
   import ChatModesToolbar from '$lib/components/ChatModesToolbar.svelte';
 
-
-
   // Add a state variable to track which features are enabled
-let enabledFeatures = {
-  inspect: true,   // Already implemented
-  speak: false,    // Coming soon
-  translate: false, // Coming soon
-  image: false      // Coming soon
-};
+  let enabledFeatures = {
+    inspect: true,   // Already implemented
+    speak: false,    // Coming soon
+    translate: false, // Coming soon
+    image: false      // Coming soon
+  };
 
-// Update the handleWordClick function to handle different tool actions
-function handleWordClick(event) {
-  const { word, posInfo, context } = event.detail;
-  selectedWord = word;
-  selectedWordPosInfo = posInfo;
-  selectedWordContext = context; // Store the context
-  showWordSidebar = true;
-}
-
-// Add handlers for other tool actions
-function handleSpeak(event) {
-  const { word } = event.detail;
-  // Implement speak functionality or show coming soon
-  if (!enabledFeatures.speak) {
-    alert("Speak feature coming soon!");
-    return;
+  // Update the handleWordClick function to handle different tool actions
+  function handleWordClick(event) {
+    const { word, posInfo, context } = event.detail;
+    selectedWord = word;
+    selectedWordPosInfo = posInfo;
+    selectedWordContext = context; // Store the context
+    showWordSidebar = true;
   }
-  // Actual implementation goes here
-}
 
-function handleTranslate(event) {
-  const { word, posInfo } = event.detail;
-  // Implement translate functionality or show coming soon
-  if (!enabledFeatures.translate) {
-    alert("Translation feature coming soon!");
-    return;
+  // Add handlers for other tool actions
+  function handleSpeak(event) {
+    const { word } = event.detail;
+    // Implement speak functionality or show coming soon
+    if (!enabledFeatures.speak) {
+      alert("Speak feature coming soon!");
+      return;
+    }
+    // Actual implementation goes here
   }
-  // Actual implementation goes here
-}
 
-function handleImage(event) {
-  const { word } = event.detail;
-  // Implement image functionality or show coming soon
-  if (!enabledFeatures.image) {
-    alert("Image feature coming soon!");
-    return;
+  function handleTranslate(event) {
+    const { word, posInfo } = event.detail;
+    // Implement translate functionality or show coming soon
+    if (!enabledFeatures.translate) {
+      alert("Translation feature coming soon!");
+      return;
+    }
+    // Actual implementation goes here
   }
-  // Actual implementation goes here
-}
+
+  function handleImage(event) {
+    const { word } = event.detail;
+    // Implement image functionality or show coming soon
+    if (!enabledFeatures.image) {
+      alert("Image feature coming soon!");
+      return;
+    }
+    // Actual implementation goes here
+  }
 
   // Get country code and person ID from URL
   const countryCode = $page.params.code;
   const personId = $page.params.personId;
 
-   // Add this to your existing variables
-   let isChatModesExpanded = false;
+  // Add this to your existing variables
+  let isChatModesExpanded = false;
   
   // Add this function to handle mode selection
   function handleModeSelect(event) {
@@ -145,6 +143,58 @@ function handleImage(event) {
   let selectedWordPosInfo = null;
   let selectedWordContext = null; // Add this missing variable
 
+  // Add confirmation dialog state variable
+  let showClearConfirmation = false;
+  
+  // Function to create a welcome message
+  function createWelcomeMessage() {
+    // Default welcome message in Spanish
+    let welcomeMessage = `¡Hola! Soy ${person.name}. ¿En qué puedo ayudarte hoy?`;
+    
+    // Choose welcome message based on language
+    if (conversationLanguage === 'russian') {
+      welcomeMessage = `Привет! Меня зовут ${person.name}. Чем я могу вам помочь сегодня?`;
+    }
+    // Add more language options as needed
+    
+    return {
+      role: 'assistant',
+      content: welcomeMessage,
+      id: generateMessageId()
+    };
+  }
+  
+  // Function to clear chat history
+  function clearChat() {
+    // Remove from localStorage
+    const storageKey = `chat_${countryCode}_${personId}`;
+    localStorage.removeItem(storageKey);
+    
+    // Reset messages to just the welcome message
+    messages = [createWelcomeMessage()];
+    
+    // Reset other chat-related state
+    lastReadMessageIndex = 0;
+    unreadCount = 0;
+    userHasScrolled = false;
+    analysisIndex = null;
+    
+    // Close the confirmation dialog
+    showClearConfirmation = false;
+    
+    // Scroll to bottom to show the welcome message
+    scrollToBottom(false);
+  }
+  
+  // Show confirmation dialog before clearing
+  function confirmClearChat() {
+    showClearConfirmation = true;
+  }
+  
+  // Cancel clear action
+  function cancelClearChat() {
+    showClearConfirmation = false;
+  }
   
   // Load chat history from localStorage
   onMount(() => {
@@ -161,20 +211,8 @@ function handleImage(event) {
     }
     
     if (messages.length === 0) {
-      // Default welcome message in Spanish
-      let welcomeMessage = `¡Hola! Soy ${person.name}. ¿En qué puedo ayudarte hoy?`;
-      
-      // Choose welcome message based on language
-      if (conversationLanguage === 'russian') {
-        welcomeMessage = `Привет! Меня зовут ${person.name}. Чем я могу вам помочь сегодня?`;
-      }
-      // Add more language options as needed
-      
-      messages = [{
-        role: 'assistant',
-        content: welcomeMessage,
-        id: generateMessageId() // Add unique ID for each message
-      }];
+      // Add default welcome message
+      messages = [createWelcomeMessage()];
     } else {
       // Ensure existing messages have IDs
       messages = messages.map(msg => ({
@@ -474,8 +512,6 @@ function handleImage(event) {
     // You could add different behavior based on the selected mode
     console.log(`Switched to ${mode} mode`);
   }
-  
-
 </script>
 
 <svelte:head>
@@ -496,6 +532,15 @@ function handleImage(event) {
         </h1>
         <p class="text-xs text-gray-500">{person.occupation} • {enhancedPerson.location}</p>
       </div>
+      <!-- Add clear chat button -->
+      <button 
+        on:click={confirmClearChat}
+        class="text-gray-500 hover:text-red-500 transition-colors flex items-center"
+        aria-label="Clear chat history"
+      >
+        <Trash2 class="h-5 w-5" />
+        <span class="hidden md:inline ml-1">Clear</span>
+      </button>
     </div>
     
     <!-- Language learning toolbar -->
@@ -569,14 +614,14 @@ function handleImage(event) {
                   {msg.content}
                 {:else}
                   <!-- In the chat messages section, modify the DefaultView component usage -->
-<DefaultView 
-message={msg.content} 
-language={conversationLanguage}
-on:wordClick={handleWordClick}
-on:speak={handleSpeak}
-on:translate={handleTranslate}
-on:image={handleImage}
-/>
+                  <DefaultView 
+                    message={msg.content} 
+                    language={conversationLanguage}
+                    on:wordClick={handleWordClick}
+                    on:speak={handleSpeak}
+                    on:translate={handleTranslate}
+                    on:image={handleImage}
+                  />
                 {/if}
               {:else}
                 <!-- User messages are always shown as-is -->
@@ -611,9 +656,9 @@ on:image={handleImage}
   </div>
 
   <ChatModesToolbar 
-  bind:expanded={isChatModesExpanded}
-  on:select={handleModeSelect}
-/>
+    bind:expanded={isChatModesExpanded}
+    on:select={handleModeSelect}
+  />
 
   <!-- Scroll to bottom button - Show when not at bottom -->
   <button 
@@ -662,4 +707,28 @@ on:image={handleImage}
     language={conversationLanguage}
     bind:visible={showWordSidebar}
   />
+{/if}
+
+<!-- Confirmation Dialog for clearing chat -->
+{#if showClearConfirmation}
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 max-w-sm mx-4">
+      <h3 class="text-lg font-medium text-gray-900 mb-3">Clear Chat History</h3>
+      <p class="text-gray-700 mb-4">Are you sure you want to clear your chat history with {person.name}? This action cannot be undone.</p>
+      <div class="flex justify-end space-x-3">
+        <button
+          on:click={cancelClearChat}
+          class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+        >
+          Cancel
+        </button>
+        <button
+          on:click={clearChat}
+          class="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600"
+        >
+          Clear
+        </button>
+      </div>
+    </div>
+  </div>
 {/if}
