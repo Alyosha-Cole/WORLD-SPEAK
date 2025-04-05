@@ -269,14 +269,33 @@
     <div class="flex flex-col h-full">
       <!-- Header -->
       <div class="flex items-center justify-between p-4 border-b border-gray-200 bg-[#007685] text-white">
-        <div>
-          <h2 class="text-xl font-bold">{wordDetails.word}</h2>
-          <div class="text-sm opacity-90">
-            {getPosDisplayName(wordDetails.pos)}
-            {#if wordDetails.translation}
-              <span class="mx-1">•</span>
-              <span class="italic">{wordDetails.translation}</span>
-            {/if}
+        <div class="flex items-center gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-xl font-bold">{wordDetails.word}</h2>
+              <!-- NEW: Audio button for the word itself -->
+              <button 
+                on:click={() => playVoice(`word-audio`, wordDetails.word)}
+                class="opacity-80 hover:opacity-100 p-1.5 rounded-full bg-white bg-opacity-20 text-white hover:bg-opacity-30 transition-colors flex-shrink-0"
+                aria-label="Play word audio"
+                title="Listen to word pronunciation"
+              >
+                {#if loadingVoiceId === `word-audio`}
+                  <Loader class="h-4 w-4 animate-spin" />
+                {:else if playingExampleId === `word-audio`}
+                  <Volume2 class="h-4 w-4 text-white" />
+                {:else}
+                  <Volume2 class="h-4 w-4" />
+                {/if}
+              </button>
+            </div>
+            <div class="text-sm opacity-90">
+              {getPosDisplayName(wordDetails.pos)}
+              {#if wordDetails.translation}
+                <span class="mx-1">•</span>
+                <span class="italic">{wordDetails.translation}</span>
+              {/if}
+            </div>
           </div>
         </div>
         <button 
@@ -295,7 +314,24 @@
           <div class="context-section">
             <h3 class="text-sm font-medium text-gray-500 uppercase mb-2">Context</h3>
             <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <p class="text-sm text-gray-800">{context}</p>
+              <div class="flex items-start gap-2">
+                <!-- NEW: Play button for the context sentence -->
+                <button 
+                  on:click={() => playVoice(`context-audio`, context)}
+                  class="opacity-70 hover:opacity-100 mt-0.5 p-1.5 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors flex-shrink-0"
+                  aria-label="Play context audio"
+                  title="Listen to full sentence"
+                >
+                  {#if loadingVoiceId === `context-audio`}
+                    <Loader class="h-4 w-4 animate-spin" />
+                  {:else if playingExampleId === `context-audio`}
+                    <Volume2 class="h-4 w-4 text-[#007685]" />
+                  {:else}
+                    <Volume2 class="h-4 w-4" />
+                  {/if}
+                </button>
+                <p class="text-sm text-gray-800">{context}</p>
+              </div>
             </div>
           </div>
         {/if}
